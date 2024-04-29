@@ -79,9 +79,6 @@ class Handler:
     args : iterable of str or None, optional
         List of command-line arguments, instead using `sys.argv` if None.
         (default is None)
-    kwargs : dict or None, optional
-        Dictionary of keyword arguments which overrides command-line
-        arguments unless None. (default is None)
     prefix : str, optional
         Prefix for command-line arguments. (default is '-')
 
@@ -120,6 +117,9 @@ class Handler:
         user).
 
     """
+
+    prefix: str
+    """Prefix for command-line arguments."""
 
     address: str
     """Address of existing ray server to connect to 
@@ -191,7 +191,6 @@ class Handler:
         default_options: dict,
         stages: Iterable[type[Stage]],
         args: typing.Union[None, Iterable[str]] = None,
-        kwargs: typing.Union[None, dict] = None,
         prefix: str = "-",
     ):
         self.stages = tuple(stages)
@@ -206,12 +205,12 @@ class Handler:
         if len(set(stage_names)) < len(stage_names):
             raise ValueError("stage names must be different")
 
+        self.prefix = prefix
         self.argument_parser = self.get_argument_parser(
-            default_parameters, default_options, prefix
+            default_parameters, default_options
         )
 
-        self.full_kwargs = self.get_full_kwargs(args, kwargs)
-        print(self.full_kwargs)
+        self.full_kwargs = self.get_full_kwargs(args)
 
         self.handler_kwargs = subset_dictionary(
             self.default_handler_options, self.full_kwargs
@@ -250,7 +249,6 @@ class Handler:
         self,
         default_parameters: dict,
         default_options: dict,
-        prefix: str = "-",
     ) -> ArgumentParser:
         """Create the command-line argument parser.
 
@@ -270,8 +268,6 @@ class Handler:
             primary function evaluations of the stages of a script, but
             affect how they are calculated or plotted.
             See `default_parameters` for description of items.
-        prefix : str, optional
-            Prefix for command-line arguments. (default is '-')
 
         """
 
@@ -287,20 +283,14 @@ class Handler:
             for name, (value, description) in parameters.items():
                 if isinstance(value, type):
                     group.add_argument(
-                        f"{prefix}{name}",
+                        f"{self.prefix}{name}",
                         type=value,
                         required=True,
                         help=f"{description} (no default value)",
                     )
-                elif isinstance(value, bool):
-                    group.add_argument(
-                        f"{prefix}{name}",
-                        action="store_true",
-                        help=f"{description} (default: False)",
-                    )
                 else:
                     group.add_argument(
-                        f"{prefix}{name}",
+                        f"{self.prefix}{name}",
                         type=type(value),
                         default=value,
                         help=f"{description} (default: {repr(value)})",
@@ -309,30 +299,28 @@ class Handler:
         return argument_parser
 
     def get_full_kwargs(
-        self,
-        args: typing.Union[None, Iterable[str]] = None,
-        kwargs: typing.Union[None, dict] = None,
+        self, args: typing.Union[dict, Iterable[str], None] = None
     ) -> dict:
         """Get the full dictionary of parameters, including default values.
 
         Parameters
         ----------
-        args : iterable of str or None, optional
-            List of command-line arguments, instead using `sys.argv` if None.
-            (default is None)
-        kwargs : dict or None, optional
-            Dictionary of keyword arguments which overrides command-line
-            arguments unless None. (default is None)
+        args : dict or iterable of str or None, optional
+            Command-line arguments either as a dictionary of `name: value`
+            pairs, iterable of strings e.g. `["-x", "0"]` for `{'x': 0}` with
+            `prefix="-"` or from `sys.argv` if None. (default is None)
 
         """
 
-        if kwargs is not None:
-            full_kwargs = vars(self.argument_parser.parse_args(args=[]))
-            full_kwargs.update(kwargs)
+        if isinstance(args, dict):
+            parser_args = []
+            for name, value in args.items():
+                parser_args.append(f"{self.prefix}{name}")
+                parser_args.append(repr(value))
         else:
-            full_kwargs = vars(self.argument_parser.parse_args(args=args))
+            parser_args = args
 
-        return full_kwargs
+        return vars(self.argument_parser.parse_args(args=parser_args))
 
     def keep_local(self, value) -> bool:
         """Whether to keep variable locally (returns True)
