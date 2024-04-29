@@ -31,6 +31,15 @@ def subset_dictionary(names: Iterable, dictionary: dict) -> dict:
     return {name: dictionary[name] for name in names}
 
 
+def get_md5(kwargs: dict) -> str:
+    """Get the plaintext md5 hash of the sorted entries of a dictionary,
+    `kwargs`."""
+
+    return hashlib.md5(
+        " ".join(f"{name} {value}" for name, value in sorted(kwargs.items())).encode()
+    ).hexdigest()
+
+
 def ensure_ray_initialized(
     func: Callable[typing.Concatenate[Handler, P], T]
 ) -> Callable[typing.Concatenate[Handler, P], T]:
@@ -222,12 +231,7 @@ class Handler:
         for stage in self.stages:
             stage.update(**self.parameters_kwargs, **self.options_kwargs)
 
-        # directory name is md5 hash of parameters
-        self.md5 = hashlib.md5(
-            " ".join(
-                str(value) for name, value in sorted(self.parameters_kwargs.items())
-            ).encode()
-        ).hexdigest()
+        self.md5 = get_md5(self.parameters_kwargs)
         self.data_directory = self.md5
 
         self.progress_file = f"{self.data_directory}/progress.csv"
