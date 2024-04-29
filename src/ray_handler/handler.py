@@ -132,7 +132,7 @@ class Handler:
     """Number of cpus per actor"""
     t: float
     """Minimum saving period [s]"""
-    cs: float
+    cs: int
     """Chunksize"""
     max_nbytes: int
     """Maximum size of numpy arrays before they are shared between 
