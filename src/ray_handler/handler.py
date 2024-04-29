@@ -8,11 +8,10 @@ from collections.abc import Callable, Iterable, Iterator
 P = typing.ParamSpec("P")
 T = typing.TypeVar("T")
 
-import math
 import numbers
 import numpy as np
 
-from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
+from argparse import ArgumentParser
 from configparser import ConfigParser
 
 import hashlib
