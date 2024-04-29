@@ -386,12 +386,12 @@ class Handler:
                 )
 
     def get_progress(self, name: str) -> int:
-        """Get progress of stage"""
+        """Get progress of stage `name`"""
 
         return self.progress_frame.loc[name, "Progress"]
 
     def set_progress(self, name: str, progress: int):
-        """Set progress of stage"""
+        """Set progress of stage `name` to `progress`"""
 
         if not isinstance(progress, numbers.Integral):
             raise TypeError("progress must be an integer")
@@ -401,12 +401,12 @@ class Handler:
             self.progress_frame.loc[name, "Progress"] = progress
 
     def get_total(self, name: str) -> int:
-        """Get total number of iterations of stage"""
+        """Get total number of iterations of stage `name`"""
 
         return self.progress_frame.loc[name, "Total"]
 
     def set_total(self, name: str, total: int):
-        """Set total number of iterations of stage"""
+        """Set total number of iterations of stage `name` to `total`"""
 
         if not isinstance(total, numbers.Integral):
             raise TypeError("total must be an integer")
@@ -415,7 +415,7 @@ class Handler:
 
     @ensure_ray_initialized
     def _make_actor_kwargs(self, stage: type[Stage]) -> dict:
-        """Create dictionary of keyword arguments for actors (remote stage)
+        """Create dictionary of keyword arguments for actors (remote `stage`)
 
         Attributes with `keep_local=False` are put in the object store and
         passed by reference.
@@ -431,8 +431,8 @@ class Handler:
     def _make_actor_pool(
         self, stage_cls: typing.Type[Stage], **actor_kwargs
     ) -> ray.util.ActorPool:
-        """Make a pool of actors for a given stage class, stage_cls, with
-        keyword arguments, actor_kwargs"""
+        """Make a pool of actors for a given stage class, `stage_cls`, with
+        keyword arguments, `actor_kwargs`"""
 
         @ray.remote(num_cpus=self.num_cpus)
         class Actor(stage_cls):
@@ -452,7 +452,8 @@ class Handler:
     ) -> Iterator:
         """Evaluate a stage's primary function.
 
-        Evaluates the primary function, `func`, of a stage, `stage`.
+        Evaluates the primary function, `func` from `get_func`, of `stage`,
+        over `iterable`.
 
         Parameters
         ----------
@@ -506,7 +507,8 @@ class Handler:
     ) -> Iterator[list]:
         """Evaluate a stage's primary function.
 
-        Evaluates the primary function, `func`, of a stage, `stage`.
+        Evaluates the primary function, `func` from `get_func`, of `stage`,
+        over `iterable` of length, `total`.
 
         - If `num_actors==1`, then evaluates serially.
 
