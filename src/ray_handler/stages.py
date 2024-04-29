@@ -33,12 +33,12 @@ class Stage(abc.ABC):
     """Total number of iterations"""
 
     def __init__(self, **kwargs):
-        """All keyword arguments are inserted into namespace"""
+        """All keyword arguments, `kwargs`, are inserted into namespace"""
 
         self.update(**kwargs)
 
     def update(self, **kwargs):
-        """Update namespace"""
+        """Update namespace with keyword arguments, `kwargs`"""
 
         return self.__dict__.update(kwargs)
 
@@ -50,7 +50,7 @@ class Stage(abc.ABC):
 
     @abc.abstractmethod
     def run(self, handler: Handler):
-        """Run method"""
+        """Run the stage with `handler`"""
 
 
 class SingleStage(Stage):
@@ -60,8 +60,8 @@ class SingleStage(Stage):
 
     METHODS
     -------
-    `func(files) -> y` : Primary function that returns the result, `y`, for
-    the `files`.
+    `func(files) -> None` : Primary function that does a calculation, and
+    modifies the dictionary of `files` with the result.
 
     Runs only once.
 
@@ -71,10 +71,11 @@ class SingleStage(Stage):
 
     @abc.abstractmethod
     def func(self, files: dict):
-        """Function"""
+        """Primary function that does a calculation, and
+        modifies the dictionary of `files` with the result."""
 
     def run(self, handler: Handler):
-        """Run method"""
+        """Run the stage with `handler`"""
 
         self.func(handler.files)
         handler.set_progress(self.name, 1)
@@ -86,8 +87,8 @@ class MultiStage(Stage):
 
     METHODS
     -------
-    `setup_namespace(namespace) -> None` : Sets up the stage's `namespace`.
-    Runs every time.
+    `setup_namespace(namespace) -> None` : Sets up the stage's `namespace`
+    with the dictionary of `files`. Runs every time.
     `setup_files(files) -> None` : Sets up the dictionary of `files`, e.g.
     adding new files. Only runs the first time.
     `func(n) -> y` : Primary function that returns the result, `y`, for each
@@ -106,35 +107,50 @@ class MultiStage(Stage):
     def setup_namespace(self, files: dict):
         """Setup stage namespace
 
+        Sets up the dictionary of `files`, e.g. adding new files. Only runs
+        the first time.
+
         warning::
-            `total` must be either a property or set here.
+            `total` must be either an existing property or set here.
 
         """
 
     @abc.abstractmethod
     def setup_files(self, files: dict):
-        """Modify dictionary of files when stage is started"""
+        """Setup dictionary of files
+
+        Sets up the dictionary of `files`, e.g. adding new files. Only runs
+        the first time.
+
+        """
 
     @abc.abstractmethod
     def write_files(self, files: dict, n: Iterable[int], results: tuple):
-        """Write results to dictionary of files"""
+        """Write results to dictionary of files
+
+        Writes the `results` of the primary function, `func`, for the input
+        indices, `n`, to the `files` dictionary. Periodically run according
+        to the handler policy.
+
+        """
 
     @abc.abstractmethod
-    def func(self, n: int):
-        """Function for iteration n"""
+    def func(self, n: int) -> typing.Any:
+        """Primary function that returns the result, `y`, for each input, of
+        index `n`."""
 
     def _func_with_index_multi(self, n: Iterable[int]) -> tuple[Iterable[int], tuple]:
-        """Function for iteration n - returns index"""
+        """Function for iteration n - return value includes index"""
 
         return (n, tuple(map(self.func, n)))
 
     def _func_with_index_single(self, n: int) -> tuple[int, typing.Any]:
-        """Function for iteration n - returns index"""
+        """Function for iteration n - return value includes index"""
 
         return (n, self.func(n))
 
     def run(self, handler: Handler):
-        """Run method"""
+        """Run the stage with `handler`"""
 
         self.setup_namespace(handler.files)
         handler.set_total(self.name, self.total)
@@ -217,7 +233,7 @@ class PlotStage(Stage):
 
     METHODS
     -------
-    `plot(files, data_directory) -> None` : Function that plots the data in
+    `plot(files, data_directory) -> None` : Plots the data in
     `files`, optionally saving to the directory, `data_directory`. Runs
     every time.
 
@@ -229,9 +245,14 @@ class PlotStage(Stage):
 
     @abc.abstractmethod
     def plot(self, files: dict, data_directory: str):
-        """Plot function"""
+        """Plot function
+
+        Plots the data in `files`, optionally saving to the directory,
+        `data_directory`. Runs every time.
+
+        """
 
     def run(self, handler: Handler):
-        """Run method"""
+        """Run the stage with `handler`"""
 
         self.plot(handler.files, handler.data_directory)
