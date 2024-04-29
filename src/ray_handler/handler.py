@@ -27,8 +27,6 @@ from .stages import Stage
 
 
 def subset_dictionary(names: Iterable, dictionary: dict) -> dict:
-    import itertools
-
     """Get the subset of a dictionary, `dictionary`, with elements, `names`"""
 
     return {name: dictionary[name] for name in names}
@@ -79,16 +77,18 @@ class Handler:
     stages : Iterable
         Iterable of instantiated script stages in order of evaluation, whose
         class inherits from the base class `Stage`.
+    args : iterable of str or None, optional
+        List of command-line arguments, instead using `sys.argv` if None.
+        (default is None)
+    kwargs : dict or None, optional
+        Dictionary of keyword arguments which overrides command-line
+        arguments unless None. (default is None)
+    prefix : str, optional
+        Prefix for command-line arguments. (default is '-')
 
     """
 
-    script_arguments_prefix: str = "-"
-    """Prefix for script arguments (parameters and options)"""
-
-    handler_arguments_prefix: str = "--"
-    """Prefix for handler-specific arguments"""
-
-    _default_handler_options: dict = dict(
+    default_handler_options: dict = dict(
         address=(
             "",
             "Address of existing ray server to connect to "
@@ -138,7 +138,10 @@ class Handler:
     """Maximum size of numpy arrays before they are shared between 
     handleres [B]"""
 
-    kwargs: dict
+    argument_parser: ArgumentParser
+    """Parser for command-line arguments"""
+
+    full_kwargs: dict
     """Dictionary of all parameters."""
     handler_kwargs: dict
     """Dictionary of parameters that determine the behavior of the handler 
@@ -188,6 +191,9 @@ class Handler:
         default_parameters: dict,
         default_options: dict,
         stages: Iterable[type[Stage]],
+        args: typing.Union[None, Iterable[str]] = None,
+        kwargs: typing.Union[None, dict] = None,
+        prefix: str = "-",
     ):
         self.stages = tuple(stages)
 
@@ -201,17 +207,20 @@ class Handler:
         if len(set(stage_names)) < len(stage_names):
             raise ValueError("stage names must be different")
 
-        self.kwargs = self.get_kwargs_from_command_line(
-            default_parameters, default_options
+        self.argument_parser = self.get_argument_parser(
+            default_parameters, default_options, prefix
         )
 
+        self.full_kwargs = self.get_full_kwargs(args, kwargs)
+        print(self.full_kwargs)
+
         self.handler_kwargs = subset_dictionary(
-            self._default_handler_options, self.kwargs
+            self.default_handler_options, self.full_kwargs
         )
         self.__dict__.update(self.handler_kwargs)
 
-        self.parameters_kwargs = subset_dictionary(default_parameters, self.kwargs)
-        self.options_kwargs = subset_dictionary(default_options, self.kwargs)
+        self.parameters_kwargs = subset_dictionary(default_parameters, self.full_kwargs)
+        self.options_kwargs = subset_dictionary(default_options, self.full_kwargs)
         for stage in self.stages:
             stage.update(**self.parameters_kwargs, **self.options_kwargs)
 
@@ -238,8 +247,13 @@ class Handler:
 
         self.binary_file = f"{self.data_directory}/data.npz"
 
-    def get_kwargs_from_command_line(self, default_parameters, default_options) -> dict:
-        """Get the parameters from the command line.
+    def get_argument_parser(
+        self,
+        default_parameters: dict,
+        default_options: dict,
+        prefix: str = "-",
+    ) -> ArgumentParser:
+        """Create the command-line argument parser.
 
         Parameters
         ----------
@@ -257,40 +271,69 @@ class Handler:
             primary function evaluations of the stages of a script, but
             affect how they are calculated or plotted.
             See `default_parameters` for description of items.
+        prefix : str, optional
+            Prefix for command-line arguments. (default is '-')
 
         """
 
-        argument_parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
+        argument_parser = ArgumentParser()
 
-        for group_name, parameters, prefix in [
-            ["Parameters", default_parameters, self.script_arguments_prefix],
-            ["Options", default_options, self.script_arguments_prefix],
-            [
-                "Handler-specific options",
-                self._default_handler_options,
-                self.handler_arguments_prefix,
-            ],
+        for group_name, parameters in [
+            ["Parameters", default_parameters],
+            ["Options", default_options],
+            ["Handler-specific options", self.default_handler_options],
         ]:
             group = argument_parser.add_argument_group(group_name)
 
             for name, (value, description) in parameters.items():
                 if isinstance(value, type):
                     group.add_argument(
-                        f"{prefix}{name}", type=value, required=True, help=description
+                        f"{prefix}{name}",
+                        type=value,
+                        required=True,
+                        help=f"{description} (no default value)",
                     )
                 elif isinstance(value, bool):
                     group.add_argument(
-                        f"{prefix}{name}", action="store_true", help=description
+                        f"{prefix}{name}",
+                        action="store_true",
+                        help=f"{description} (default: False)",
                     )
                 else:
                     group.add_argument(
                         f"{prefix}{name}",
                         type=type(value),
-                        default=repr(value),
-                        help=description,
+                        default=value,
+                        help=f"{description} (default: {repr(value)})",
                     )
 
-        return vars(argument_parser.parse_args())
+        return argument_parser
+
+    def get_full_kwargs(
+        self,
+        args: typing.Union[None, Iterable[str]] = None,
+        kwargs: typing.Union[None, dict] = None,
+    ) -> dict:
+        """Get the full dictionary of parameters, including default values.
+
+        Parameters
+        ----------
+        args : iterable of str or None, optional
+            List of command-line arguments, instead using `sys.argv` if None.
+            (default is None)
+        kwargs : dict or None, optional
+            Dictionary of keyword arguments which overrides command-line
+            arguments unless None. (default is None)
+
+        """
+
+        if kwargs is not None:
+            full_kwargs = vars(self.argument_parser.parse_args(args=[]))
+            full_kwargs.update(kwargs)
+        else:
+            full_kwargs = vars(self.argument_parser.parse_args(args=args))
+
+        return full_kwargs
 
     def keep_local(self, value) -> bool:
         """Whether to keep variable locally (returns True)
@@ -530,9 +573,15 @@ class Handler:
             yield chunk
 
     def optimized_chunksize(self, size: int) -> int:
-        """Optimized chunksize for an iterable, of length `size`"""
+        """Optimized chunksize for an iterable, of length `size`.
 
-        return min(math.floor(size / (3 * self.num_actors)), self.cs)
+        Returns the smallest of `size//(3*num_actors)` and the chunksize,
+        `cs`, to ensure each actor receives reasonably sized chunks of
+        similar length.
+
+        """
+
+        return min(size // (3 * self.num_actors), self.cs)
 
     def save(self):
         """Save files to npz binary and progress dataframe to csv file"""

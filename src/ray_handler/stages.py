@@ -58,6 +58,11 @@ class SingleStage(Stage):
 
     Evaluates a function, `func`.
 
+    METHODS
+    -------
+    `func(files) -> y` : Primary function that returns the result, `y`, for
+    the `files`.
+
     Runs only once.
 
     """
@@ -79,11 +84,17 @@ class SingleStage(Stage):
 class MultiStage(Stage):
     """Multi stage.
 
-    When the stage is first run, the dictionary of files to save are setup by
-    the `setup_files` function. Then, the stage namespace is set up with the
-    `setup_namespace` function. Then, the stage evaluates a function, `func`,
-    over multiple inputs. Results are periodically saved with the
-    `write_files` function.
+    METHODS
+    -------
+    `setup_namespace(namespace) -> None` : Sets up the stage's `namespace`.
+    Runs every time.
+    `setup_files(files) -> None` : Sets up the dictionary of `files`, e.g.
+    adding new files. Only runs the first time.
+    `func(n) -> y` : Primary function that returns the result, `y`, for each
+    input, of index `n`.
+    `write_files(files, n, results) -> None` : Writes the `results` of the
+    primary function, `func`, for the input indices, `n`, to the `files`
+    dictionary. Periodically run according to the handler policy.
 
     Runs only to completion.
 
@@ -204,7 +215,11 @@ class MultiStage(Stage):
 class PlotStage(Stage):
     """Plot stage.
 
-    Plots the results using `plot` function.
+    METHODS
+    -------
+    `plot(files, data_directory) -> None` : Function that plots the data in
+    `files`, optionally saving to the directory, `data_directory`. Runs
+    every time.
 
     Runs every time (`total=-1`).
 
