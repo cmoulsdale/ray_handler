@@ -2,6 +2,81 @@
 
 A package for distributed computation using ray.
 
+## Installation
+
+Install from github with Python>=3.10:
+
+```bash
+  pip install git+https://github.com/spoopydale/ray_handler
+```
+
+## Usage/Examples
+
+The following script requires matplotlib:
+
+```python
+from ray_handler import Handler, stages
+
+import numpy as np
+
+import matplotlib.pyplot as plt
+
+default_parameters = dict(
+    x_min=(-1.0, "Minimum x"),
+    x_max=(1.0, "Maximum x"),
+    P=(101, "Number of x"),
+)
+default_options = dict(color=("k", "Line color"))
+
+
+class Square(stages.MultiStage):
+    name = "Square x"
+
+    @property
+    def total(self):
+        return self.P
+
+    def setup_namespace(self, files):
+        self.x = np.linspace(self.x_min, self.x_max, self.P)
+
+    def setup_files(self, files):
+        files["x_squared"] = np.empty(self.P)
+
+    def func(self, n):
+        return (self.x[n] ** 2,)
+
+    def write_files(self, files, n, results):
+        (x_squared,) = zip(*results)
+        files["x_squared"][n] = x_squared
+
+
+class Plot(stages.PlotStage):
+    name = "Plot"
+
+    def plot(self, files, data_directory):
+        x = np.linspace(self.x_min, self.x_max, self.P)
+
+        fig, axis = plt.subplots()
+        axis.plot(x, files["x_squared"], c=self.color)
+        axis.set_xlabel("$x$")
+        axis.set_ylabel("$x^2$")
+        fig.tight_layout()
+        fig.savefig(f"{data_directory}/x_squared.png")
+        plt.show()
+
+
+if __name__ == "__main__":
+    handler = Handler(
+        default_parameters,
+        default_options,
+        [Square(), Plot()],
+        args=["-num_actors", "2", "-P", "201"],
+    )
+    handler.run()
+```
+
+## Features
+
 Handler reads arguments from the command line for each group:
  - Parameters that determine the output of primary function evaluations of the stages of a script.
  - Options that do not affect the output of primary function evaluations of the stages of a script, but affect how they are calculated or plotted.
