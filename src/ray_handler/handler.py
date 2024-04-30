@@ -85,9 +85,12 @@ class Handler:
     stages : Iterable
         Iterable of instantiated script stages in order of evaluation, whose
         class inherits from the base class ``Stage``.
-    args : iterable of str or None, optional
-        List of command-line arguments, instead using ``sys.argv`` if None.
-        (default is None)
+    args : dict or iterable of str or None, optional
+        Command-line arguments either as a dictionary of ``name: value``
+        pairs, iterable of strings e.g. ``["-x", "0"]`` for ``{'x': 0}`` with
+        ``prefix="-"`` or from ``sys.argv`` if None. The full list of
+        parameters and their default values is given by the ``--help``
+        argument (default is None)
     prefix : str, optional
         Prefix for command-line arguments. (default is '-')
 
@@ -312,7 +315,9 @@ class Handler:
         args : dict or iterable of str or None, optional
             Command-line arguments either as a dictionary of ``name: value``
             pairs, iterable of strings e.g. ``["-x", "0"]`` for ``{'x': 0}`` with
-            ``prefix="-"`` or from ``sys.argv`` if None. (default is None)
+            ``prefix="-"`` or from ``sys.argv`` if None. The full list of
+            parameters and their default values is given by the ``--help``
+            argument (default is None)
 
         """
 
