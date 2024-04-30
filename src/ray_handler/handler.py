@@ -26,14 +26,14 @@ from .stages import Stage
 
 
 def subset_dictionary(names: Iterable, dictionary: dict) -> dict:
-    """Get the subset of a dictionary, `dictionary`, with elements, `names`"""
+    """Get the subset of a dictionary, ``dictionary``, with elements, ``names``"""
 
     return {name: dictionary[name] for name in names}
 
 
 def get_md5(kwargs: dict) -> str:
     """Get the plaintext md5 hash of the sorted entries of a dictionary,
-    `kwargs`."""
+    ``kwargs``."""
 
     return hashlib.md5(
         " ".join(f"{name} {value}" for name, value in sorted(kwargs.items())).encode()
@@ -71,22 +71,22 @@ class Handler:
     default_parameters : dict
         Dictionary of default parameters that determine the output of
         primary function evaluations of the stages of a script.
-        Each item has signature `name: (value, description)`, corresponding
-        to a parameter with name, `name`, default value, `value`, and
-        description, `description`.
-        Parameter type is inferred from the type of `value`, and no default
-        value is given if `value` is a type (this must be provided by the
+        Each item has signature ``name: (value, description)``, corresponding
+        to a parameter with name, ``name``, default value, ``value``, and
+        description, ``description``.
+        Parameter type is inferred from the type of ``value``, and no default
+        value is given if ``value`` is a type (this must be provided by the
         user).
     default_options : dict
         Dictionary of default options that do not affect the output of
         primary function evaluations of the stages of a script, but
         affect how they are calculated or plotted.
-        See `default_parameters` for description of items.
+        See ``default_parameters`` for description of items.
     stages : Iterable
         Iterable of instantiated script stages in order of evaluation, whose
-        class inherits from the base class `Stage`.
+        class inherits from the base class ``Stage``.
     args : iterable of str or None, optional
-        List of command-line arguments, instead using `sys.argv` if None.
+        List of command-line arguments, instead using ``sys.argv`` if None.
         (default is None)
     prefix : str, optional
         Prefix for command-line arguments. (default is '-')
@@ -106,8 +106,8 @@ class Handler:
         cs=(1, "Chunksize"),
         max_nbytes=(
             10_240,
-            "Maximum size of numpy arrays before they are shared "
-            "between handleres [B]",
+            "Maximum size of numpy arrays before they are put in the object "
+            "store and shared between actors [B]",
         ),
     )
     """Default handler-specific options
@@ -118,11 +118,11 @@ class Handler:
     Returns
     -------
     dict
-        Each item has signature `name: (value, description)`, corresponding
-        to a parameter with name, `name`, default value, `value`, and
-        description, `description`.
-        Parameter type is inferred from the type of `value`, and no default
-        value is given if `value` is a type (this must be provided by the
+        Each item has signature ``name: (value, description)``, corresponding
+        to a parameter with name, ``name``, default value, ``value``, and
+        description, ``description``.
+        Parameter type is inferred from the type of ``value``, and no default
+        value is given if ``value`` is a type (this must be provided by the
         user).
 
     """
@@ -143,8 +143,8 @@ class Handler:
     cs: int
     """Chunksize"""
     max_nbytes: int
-    """Maximum size of numpy arrays before they are shared between 
-    handleres [B]"""
+    """Maximum size of numpy arrays before they are put in the object 
+    store and shared between actors [B]"""
 
     argument_parser: ArgumentParser
     """Parser for command-line arguments"""
@@ -165,7 +165,7 @@ class Handler:
     md5: str
     """md5 hash of arguments gives unique ID"""
     data_directory: str
-    """Directory of data files (equal to `md5`)"""
+    """Directory of data files (equal to ``md5``)"""
     progress_file: str
     """Location of progress file"""
     binary_file: str
@@ -261,17 +261,17 @@ class Handler:
         default_parameters : dict
             Dictionary of default parameters that determine the output of
             primary function evaluations of the stages of a script.
-            Each item has signature `name: (value, description)`, corresponding
-            to a parameter with name, `name`, default value, `value`, and
-            description, `description`.
-            Parameter type is inferred from the type of `value`, and no default
-            value is given if `value` is a type (this must be provided by the
+            Each item has signature ``name: (value, description)``, corresponding
+            to a parameter with name, ``name``, default value, ``value``, and
+            description, ``description``.
+            Parameter type is inferred from the type of ``value``, and no default
+            value is given if ``value`` is a type (this must be provided by the
             user).
         default_options : dict
             Dictionary of default options that do not affect the output of
             primary function evaluations of the stages of a script, but
             affect how they are calculated or plotted.
-            See `default_parameters` for description of items.
+            See ``default_parameters`` for description of items.
 
         """
 
@@ -310,9 +310,9 @@ class Handler:
         Parameters
         ----------
         args : dict or iterable of str or None, optional
-            Command-line arguments either as a dictionary of `name: value`
-            pairs, iterable of strings e.g. `["-x", "0"]` for `{'x': 0}` with
-            `prefix="-"` or from `sys.argv` if None. (default is None)
+            Command-line arguments either as a dictionary of ``name: value``
+            pairs, iterable of strings e.g. ``["-x", "0"]`` for ``{'x': 0}`` with
+            ``prefix="-"`` or from ``sys.argv`` if None. (default is None)
 
         """
 
@@ -377,12 +377,12 @@ class Handler:
                 )
 
     def get_progress(self, name: str) -> int:
-        """Get progress of stage `name`"""
+        """Get progress of stage ``name``"""
 
         return self.progress_frame.loc[name, "Progress"]
 
     def set_progress(self, name: str, progress: int):
-        """Set progress of stage `name` to `progress`"""
+        """Set progress of stage ``name`` to ``progress``"""
 
         if not isinstance(progress, numbers.Integral):
             raise TypeError("progress must be an integer")
@@ -392,12 +392,12 @@ class Handler:
             self.progress_frame.loc[name, "Progress"] = progress
 
     def get_total(self, name: str) -> int:
-        """Get total number of iterations of stage `name`"""
+        """Get total number of iterations of stage ``name``"""
 
         return self.progress_frame.loc[name, "Total"]
 
     def set_total(self, name: str, total: int):
-        """Set total number of iterations of stage `name` to `total`"""
+        """Set total number of iterations of stage ``name`` to ``total``"""
 
         if not isinstance(total, numbers.Integral):
             raise TypeError("total must be an integer")
@@ -406,9 +406,9 @@ class Handler:
 
     @ensure_ray_initialized
     def _make_actor_kwargs(self, stage: type[Stage]) -> dict:
-        """Create dictionary of keyword arguments for actors (remote `stage`)
+        """Create dictionary of keyword arguments for actors (remote ``stage``)
 
-        Attributes with `keep_local=False` are put in the object store and
+        Attributes with ``keep_local=False`` are put in the object store and
         passed by reference.
 
         """
@@ -422,8 +422,8 @@ class Handler:
     def _make_actor_pool(
         self, stage_cls: typing.Type[Stage], **actor_kwargs
     ) -> ray.util.ActorPool:
-        """Make a pool of actors for a given stage class, `stage_cls`, with
-        keyword arguments, `actor_kwargs`"""
+        """Make a pool of actors for a given stage class, ``stage_cls``, with
+        keyword arguments, ``actor_kwargs``"""
 
         @ray.remote(num_cpus=self.num_cpus)
         class Actor(stage_cls):
@@ -443,20 +443,20 @@ class Handler:
     ) -> Iterator:
         """Evaluate a stage's primary function.
 
-        Evaluates the primary function, `func` from `get_func`, of `stage`,
-        over `iterable`.
+        Evaluates the primary function, ``func`` from ``get_func``, of ``stage``,
+        over ``iterable``.
 
         Parameters
         ----------
         stage : Stage
             Initialized stage
         get_func : callable
-            Function, with signature `get_func(stage) -> func`, that
-            returns the stage's primary function, `func` with signature
-            `func(x) -> y`, that operates on each input, `x`, and returns a
-            result, `y`.
+            Function, with signature ``get_func(stage) -> func``, that
+            returns the stage's primary function, ``func`` with signature
+            ``func(x) -> y``, that operates on each input, ``x``, and returns a
+            result, ``y``.
         iterable
-            Iterable of inputs, `x`.
+            Iterable of inputs, ``x``.
 
         Yields
         ------
@@ -465,7 +465,7 @@ class Handler:
         warning::
             Results are yielded in completion order, not
             submission order. If order is important, then include this in the
-            return value of `func`.
+            return value of ``func``.
 
         """
 
@@ -498,41 +498,41 @@ class Handler:
     ) -> Iterator[list]:
         """Evaluate a stage's primary function.
 
-        Evaluates the primary function, `func` from `get_func`, of `stage`,
-        over `iterable` of length, `total`.
+        Evaluates the primary function, ``func`` from ``get_func``, of ``stage``,
+        over ``iterable`` of length, ``total``.
 
-        - If `num_actors==1`, then evaluates serially.
+        - If ``num_actors==1``, then evaluates serially.
 
-        - If `num_actors>1`, then evaluates in parallel with a pool of
+        - If ``num_actors>1``, then evaluates in parallel with a pool of
         actors.
 
         Chunks of output in completion order are yielded every time period,
-        `t`, or when evaluation is complete.
+        ``t``, or when evaluation is complete.
 
         Parameters
         ----------
         stage : Stage
             Initialized stage
         get_func : callable
-            Function, with signature `get_func(stage) -> func`, that
-            returns the stage's primary function, `func` with signature
-            `func(x) -> y`, that operates on each input, `x`, and returns a
-            result, `y`.
+            Function, with signature ``get_func(stage) -> func``, that
+            returns the stage's primary function, ``func`` with signature
+            ``func(x) -> y``, that operates on each input, ``x``, and returns a
+            result, ``y``.
         iterable
-            Iterable of inputs, `x`.
+            Iterable of inputs, ``x``.
         total : {int, None}, optional
-            Length of iterable. If `total = None`, then the iterable is of
-            indeterminate length. (default is `None`)
+            Length of iterable. If ``total = None``, then the iterable is of
+            indeterminate length. (default is ``None``)
 
         Yields
         ------
         chunk : list
-            List of newly completed output, `y`.
+            List of newly completed output, ``y``.
 
         warning::
             Results are returned in chunks in completion order, not
             submission order. If order is important, then include this in the
-            return value of `func`.
+            return value of ``func``.
 
         """
 
@@ -566,10 +566,10 @@ class Handler:
             yield chunk
 
     def optimized_chunksize(self, size: int) -> int:
-        """Optimized chunksize for an iterable, of length `size`.
+        """Optimized chunksize for an iterable, of length ``size``.
 
-        Returns the smallest of `size//(3*num_actors)` and the chunksize,
-        `cs`, to ensure each actor receives reasonably sized chunks of
+        Returns the smallest of ``size//(3*num_actors)`` and the chunksize,
+        ``cs``, to ensure each actor receives reasonably sized chunks of
         similar length.
 
         """

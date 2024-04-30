@@ -17,9 +17,9 @@ if typing.TYPE_CHECKING:
 class Stage(abc.ABC):
     """Abstract base class for stages
 
-    Stage is run using `run` function.
+    Stage is run using ``run`` function.
 
-    Runs every time if `total<0` else to completion.
+    Runs every time if ``total<0`` else to completion.
 
     """
 
@@ -33,12 +33,12 @@ class Stage(abc.ABC):
     """Total number of iterations"""
 
     def __init__(self, **kwargs):
-        """All keyword arguments, `kwargs`, are inserted into namespace"""
+        """All keyword arguments, ``kwargs``, are inserted into namespace"""
 
         self.update(**kwargs)
 
     def update(self, **kwargs):
-        """Update namespace with keyword arguments, `kwargs`"""
+        """Update namespace with keyword arguments, ``kwargs``"""
 
         return self.__dict__.update(kwargs)
 
@@ -50,18 +50,18 @@ class Stage(abc.ABC):
 
     @abc.abstractmethod
     def run(self, handler: Handler):
-        """Run the stage with `handler`"""
+        """Run the stage with ``handler``"""
 
 
 class SingleStage(Stage):
     """Single stage.
 
-    Evaluates a function, `func`.
+    Evaluates a function, ``func``.
 
     METHODS
     -------
-    `func(files) -> None` : Primary function that does a calculation, and
-    modifies the dictionary of `files` with the result.
+    ``func(files) -> None`` : Primary function that does a calculation, and
+    modifies the dictionary of ``files`` with the result.
 
     Runs only once.
 
@@ -72,10 +72,10 @@ class SingleStage(Stage):
     @abc.abstractmethod
     def func(self, files: dict):
         """Primary function that does a calculation, and
-        modifies the dictionary of `files` with the result."""
+        modifies the dictionary of ``files`` with the result."""
 
     def run(self, handler: Handler):
-        """Run the stage with `handler`"""
+        """Run the stage with ``handler``"""
 
         self.func(handler.files)
         handler.set_progress(self.name, 1)
@@ -87,14 +87,14 @@ class MultiStage(Stage):
 
     METHODS
     -------
-    `setup_namespace(namespace) -> None` : Sets up the stage's `namespace`
-    with the dictionary of `files`. Runs every time.
-    `setup_files(files) -> None` : Sets up the dictionary of `files`, e.g.
+    ``setup_namespace(namespace) -> None`` : Sets up the stage's ``namespace``
+    with the dictionary of ``files``. Runs every time.
+    ``setup_files(files) -> None`` : Sets up the dictionary of ``files``, e.g.
     adding new files. Only runs the first time.
-    `func(n) -> y` : Primary function that returns the result, `y`, for each
-    input, of index `n`.
-    `write_files(files, n, results) -> None` : Writes the `results` of the
-    primary function, `func`, for the input indices, `n`, to the `files`
+    ``func(n) -> y`` : Primary function that returns the result, ``y``, for each
+    input, of index ``n``.
+    ``write_files(files, n, results) -> None`` : Writes the ``results`` of the
+    primary function, ``func``, for the input indices, ``n``, to the ``files``
     dictionary. Periodically run according to the handler policy.
 
     Runs only to completion.
@@ -107,11 +107,11 @@ class MultiStage(Stage):
     def setup_namespace(self, files: dict):
         """Setup stage namespace
 
-        Sets up the dictionary of `files`, e.g. adding new files. Only runs
+        Sets up the dictionary of ``files``, e.g. adding new files. Only runs
         the first time.
 
         warning::
-            `total` must be either an existing property or set here.
+            ``total`` must be either an existing property or set here.
 
         """
 
@@ -119,7 +119,7 @@ class MultiStage(Stage):
     def setup_files(self, files: dict):
         """Setup dictionary of files
 
-        Sets up the dictionary of `files`, e.g. adding new files. Only runs
+        Sets up the dictionary of ``files``, e.g. adding new files. Only runs
         the first time.
 
         """
@@ -128,16 +128,16 @@ class MultiStage(Stage):
     def write_files(self, files: dict, n: Iterable[int], results: tuple):
         """Write results to dictionary of files
 
-        Writes the `results` of the primary function, `func`, for the input
-        indices, `n`, to the `files` dictionary. Periodically run according
+        Writes the ``results`` of the primary function, ``func``, for the input
+        indices, ``n``, to the ``files`` dictionary. Periodically run according
         to the handler policy.
 
         """
 
     @abc.abstractmethod
     def func(self, n: int) -> typing.Any:
-        """Primary function that returns the result, `y`, for each input, of
-        index `n`."""
+        """Primary function that returns the result, ``y``, for each input, of
+        index ``n``."""
 
     def _func_with_index_multi(self, n: Iterable[int]) -> tuple[Iterable[int], tuple]:
         """Function for iteration n - return value includes index"""
@@ -150,7 +150,7 @@ class MultiStage(Stage):
         return (n, self.func(n))
 
     def run(self, handler: Handler):
-        """Run the stage with `handler`"""
+        """Run the stage with ``handler``"""
 
         self.setup_namespace(handler.files)
         handler.set_total(self.name, self.total)
@@ -233,11 +233,11 @@ class PlotStage(Stage):
 
     METHODS
     -------
-    `plot(files, data_directory) -> None` : Plots the data in
-    `files`, optionally saving to the directory, `data_directory`. Runs
+    ``plot(files, data_directory) -> None`` : Plots the data in
+    ``files``, optionally saving to the directory, ``data_directory``. Runs
     every time.
 
-    Runs every time (`total=-1`).
+    Runs every time (``total=-1``).
 
     """
 
@@ -247,12 +247,12 @@ class PlotStage(Stage):
     def plot(self, files: dict, data_directory: str):
         """Plot function
 
-        Plots the data in `files`, optionally saving to the directory,
-        `data_directory`. Runs every time.
+        Plots the data in ``files``, optionally saving to the directory,
+        ``data_directory``. Runs every time.
 
         """
 
     def run(self, handler: Handler):
-        """Run the stage with `handler`"""
+        """Run the stage with ``handler``"""
 
         self.plot(handler.files, handler.data_directory)
