@@ -451,6 +451,7 @@ class Handler:
         Evaluates the primary function, ``func`` from ``get_func``, of ``stage``,
         over ``iterable``.
 
+
         Parameters
         ----------
         stage : Stage
@@ -463,9 +464,11 @@ class Handler:
         iterable
             Iterable of inputs, ``x``.
 
+
         Yields
         ------
         y
+
 
         warning::
             Results are yielded in completion order, not
@@ -529,10 +532,12 @@ class Handler:
             Length of iterable. If ``total = None``, then the iterable is of
             indeterminate length. (default is ``None``)
 
+
         Yields
         ------
         chunk : list
             List of newly completed output, ``y``.
+
 
         warning::
             Results are returned in chunks in completion order, not

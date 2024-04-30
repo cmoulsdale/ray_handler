@@ -58,9 +58,9 @@ class SingleStage(Stage):
 
     Evaluates a function, ``func``.
 
-    METHODS
-    -------
-    ``func(files) -> None`` : Primary function that does a calculation, and
+    User-defined methods:
+
+    - ``func(files) -> None`` : Primary function that does a calculation, and
     modifies the dictionary of ``files`` with the result.
 
     Runs only once.
@@ -85,15 +85,18 @@ class SingleStage(Stage):
 class MultiStage(Stage):
     """Multi stage.
 
-    METHODS
-    -------
-    ``setup_namespace(namespace) -> None`` : Sets up the stage's ``namespace``
+    User-defined methods:
+
+    - ``setup_namespace(namespace) -> None`` : Sets up the stage's ``namespace``
     with the dictionary of ``files``. Runs every time.
-    ``setup_files(files) -> None`` : Sets up the dictionary of ``files``, e.g.
+
+    - ``setup_files(files) -> None`` : Sets up the dictionary of ``files``, e.g.
     adding new files. Only runs the first time.
-    ``func(n) -> y`` : Primary function that returns the result, ``y``, for each
+
+    - ``func(n) -> y`` : Primary function that returns the result, ``y``, for each
     input, of index ``n``.
-    ``write_files(files, n, results) -> None`` : Writes the ``results`` of the
+
+    - ``write_files(files, n, results) -> None`` : Writes the ``results`` of the
     primary function, ``func``, for the input indices, ``n``, to the ``files``
     dictionary. Periodically run according to the handler policy.
 
@@ -231,9 +234,9 @@ class MultiStage(Stage):
 class PlotStage(Stage):
     """Plot stage.
 
-    METHODS
-    -------
-    ``plot(files, data_directory) -> None`` : Plots the data in
+    User-defined methods:
+
+    - ``plot(files, data_directory) -> None`` : Plots the data in
     ``files``, optionally saving to the directory, ``data_directory``. Runs
     every time.
 
