@@ -12,7 +12,7 @@ Install from github with Python>=3.10:
 
 ## Usage/Examples
 
-The following script requires matplotlib:
+The following script requires matplotlib (``pip install matplotlib``):
 
 ```python
 from ray_handler import Handler, stages
@@ -29,8 +29,16 @@ default_parameters = dict(
 default_options = dict(color=("k", "Line color"))
 
 
-class Square(stages.MultiStage):
-    name = "Square x"
+class Square1(stages.SingleStage):
+    name = "Square x: single stage"
+
+    def func(self, files):
+        x = np.linspace(self.x_min, self.x_max, self.P)
+        files["x_squared_1"] = x**2
+
+
+class Square2(stages.MultiStage):
+    name = "Square x: multi stage"
 
     @property
     def total(self):
@@ -40,14 +48,14 @@ class Square(stages.MultiStage):
         self.x = np.linspace(self.x_min, self.x_max, self.P)
 
     def setup_files(self, files):
-        files["x_squared"] = np.empty(self.P)
+        files["x_squared_2"] = np.empty(self.P)
 
     def func(self, n):
         return (self.x[n] ** 2,)
 
     def write_files(self, files, n, results):
         (x_squared,) = zip(*results)
-        files["x_squared"][n] = x_squared
+        files["x_squared_2"][n] = x_squared
 
 
 class Plot(stages.PlotStage):
@@ -56,8 +64,10 @@ class Plot(stages.PlotStage):
     def plot(self, files, data_directory):
         x = np.linspace(self.x_min, self.x_max, self.P)
 
+        assert (files["x_squared_1"] == files["x_squared_2"]).all()
+
         fig, axis = plt.subplots()
-        axis.plot(x, files["x_squared"], c=self.color)
+        axis.plot(x, files["x_squared_2"], c=self.color)
         axis.set_xlabel("$x$")
         axis.set_ylabel("$x^2$")
         fig.tight_layout()
@@ -69,7 +79,7 @@ if __name__ == "__main__":
     handler = Handler(
         default_parameters,
         default_options,
-        [Square(), Plot()],
+        [Square1(), Square2(), Plot()],
         args=["-num_actors", "2", "-P", "201"],
     )
     handler.run()
