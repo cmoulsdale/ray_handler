@@ -1,4 +1,4 @@
-![Python workflow](https://github.com/spoopydale/ray_handler/actions/workflows/python-package.yml/badge.svg)
+![Python workflow](https://github.com/spoopydale/ray_handler/actions/workflows/python-package.yml/badge.svg) [![Documentation Status](https://readthedocs.org/projects/ray-handler/badge/?version=latest)](https://ray-handler.readthedocs.io/en/latest/?badge=latest)
 
 # Ray Handler Package
 
