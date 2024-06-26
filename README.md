@@ -1,3 +1,5 @@
+![Python workflow](https://github.com/spoopydale/ray_handler/actions/workflows/python-package.yml/badge.svg)
+
 # Ray Handler Package
 
 A package for distributed computation using ray.
