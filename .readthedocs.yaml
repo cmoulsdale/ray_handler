@@ -16,6 +16,7 @@ build:
     # golang: "1.19"
   jobs:
     pre_build:
+     - python -m build
      - python -m pip install dist/ray_handler-0.0.0-py3-none-any.whl
      - sphinx-apidoc -f -o "docs" "."
 
