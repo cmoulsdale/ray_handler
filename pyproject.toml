@@ -30,6 +30,5 @@ Issues = "https://github.com/spoopydale/ray_handler/issues"
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = "-ra -q"
-testpaths = [
-    "tests",
-]
+pythonpath = ["src"]
+testpaths = ["tests"]
