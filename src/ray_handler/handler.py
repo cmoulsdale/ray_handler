@@ -316,11 +316,12 @@ class Handler:
         Parameters
         ----------
         args : dict or iterable of str or None, optional
-            Command-line arguments either as a dictionary of ``name: value``
-            pairs, iterable of strings e.g. ``["-x", "0"]`` for ``{'x': 0}`` with
-            ``prefix="-"`` or from ``sys.argv`` if None. The full list of
-            parameters and their default values is given by the ``--help``
-            argument (default is None)
+            Argument either in command-line iterable format (taken
+            from ``sys.argv`` if None) or as a dictionary (default is None).
+
+
+        note:: E.g. for ``a=1`` and ``b=2``, then valid responses include
+            ``["-a", "1", "-b", "2"]`` and ``{'a': 1, 'b': 2}``
 
         """
 
