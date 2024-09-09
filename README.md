@@ -1,4 +1,4 @@
-![Python workflow](https://github.com/spoopydale/ray_handler/actions/workflows/python-package.yml/badge.svg) [![Documentation Status](https://readthedocs.org/projects/ray-handler/badge/?version=latest)](https://ray-handler.readthedocs.io/en/latest/?badge=latest)
+![Python workflow](https://github.com/cmoulsdale/ray_handler/actions/workflows/python-package.yml/badge.svg) [![Documentation Status](https://readthedocs.org/projects/ray-handler/badge/?version=latest)](https://ray-handler.readthedocs.io/en/latest/?badge=latest)
 
 # Ray Handler Package
 
@@ -11,7 +11,7 @@ Documentation is available at https://ray-handler.readthedocs.io/en/latest
 Install from github with Python>=3.10:
 
 ```bash
-  pip install git+https://github.com/spoopydale/ray_handler
+  pip install git+https://github.com/cmoulsdale/ray_handler
 ```
 
 ## Features
